@@ -222,7 +222,7 @@ if [[ -n $AUDITWHEEL_PLAT ]]; then
     APPIMAGE_PLATFORM=$AUDITWHEEL_PLAT
 else
     # This is used for python-appimage and requires a manylinux version!
-    APPIMAGE_PLATFORM="manylinux2014_$APPIMAGE_ARCH"
+    APPIMAGE_PLATFORM="manylinux_2_28_$APPIMAGE_ARCH"
 fi
 
 APP_BASE="ratarmount-$APPIMAGE_PLATFORM"
