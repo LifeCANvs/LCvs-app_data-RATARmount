@@ -47,6 +47,7 @@ from .utils import (
     ceilDiv,
     getXdgCacheHome,
     isOnSlowDrive,
+    openPreadable,
     overrides,
 )
 from .BlockParallelReaders import ParallelXZReader
@@ -710,7 +711,7 @@ class SQLiteIndexedTar(SQLiteIndexMountSource):
         # If no fileObject given, then self.tarFileName is the path to the archive to open.
         self._fileObjectsToCloseOnDel: List[IO[bytes]] = []
         if not fileObject:
-            fileObject = open(self.tarFileName, 'rb')
+            fileObject = openPreadable(self.tarFileName, closefd=True)
             self._fileObjectsToCloseOnDel.append(fileObject)
         fileObject.seek(0, io.SEEK_END)
         fileSize = fileObject.tell()
@@ -1192,12 +1193,13 @@ class SQLiteIndexedTar(SQLiteIndexMountSource):
         assert isinstance(tarFileInfo, SQLiteIndexedTarUserData)
 
         if tarFileInfo.issparse:
-            with self.open(fileInfo) as file:
-                file.seek(offset, os.SEEK_SET)
+            # Open file without buffering because we are only doing a single read before closing it again anyway.
+            # Without buffering, RawStenciledFile will be returned, which uses pread if available.
+            with self.open(fileInfo, buffering=0) as file:
+                file.seek(offset, io.SEEK_SET)
                 return file.read(size)
 
-        # For non-sparse files, we can simply seek to the offset and read from it.
-        self.tarFileObject.seek(tarFileInfo.offset + offset, os.SEEK_SET)
+        self.tarFileObject.seek(tarFileInfo.offset + offset, io.SEEK_SET)
         return self.tarFileObject.read(size)
 
     @overrides(MountSource)

@@ -9,7 +9,7 @@ import platform
 import sys
 import types
 
-from typing import Dict, Generic, Iterable, List, Optional, TypeVar, Union
+from typing import Dict, Generic, Iterable, IO, List, Optional, TypeVar, Union
 
 import importlib
 
@@ -309,3 +309,17 @@ def getXdgCacheHome():
     if path.startswith(home):
         path = "~/" + path[len(home) :]
     return path if path else os.path.join('~', '.cache')
+
+
+def openPreadable(pathOrFd: Union[int, str], buffering: int = -1, closefd: bool = True) -> IO[bytes]:
+    fd = pathOrFd if isinstance(pathOrFd, int) else os.open(pathOrFd, os.O_RDONLY)
+    fileObject = open(fd, 'rb', buffering=buffering, closefd=closefd)
+    assert fileObject.fileno() == fd
+    assert not hasattr(fileObject, 'pread')
+
+    # Inject a pread method so that RawStenciledFile can use that!
+    def pread(size: int, offset: int):
+        return os.pread(fd, size, offset)
+
+    setattr(fileObject, 'pread', pread)
+    return fileObject
