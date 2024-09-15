@@ -46,6 +46,7 @@ And in contrast to [tarindexer](https://github.com/devsnd/tarindexer), which als
 
  - **Rar** as provided by [rarfile](https://github.com/markokr/rarfile) by Marko Kreen. See also the [RAR 5.0 archive format](https://www.rarlab.com/technote.htm).
  - **Zip** as provided by [zipfile](https://docs.python.org/3/library/zipfile.html), which is distributed with Python itself. See also the [ZIP File Format Specification](https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT).
+ - **FAT12/FAT16/FAT32/VFAT** as provided by [PyFatFS](https://github.com/nathanhi/pyfatfs) by Nathan-J. Hirschauer. See also [Microsoft's FAT32 File System Specification](https://download.microsoft.com/download/1/6/1/161ba512-40e2-4cc9-843a-923143f3456c/fatgen103.doc).
  - **Many Others** as provided by [libarchive](https://github.com/libarchive/libarchive) via  [python-libarchive-c](https://github.com/Changaco/python-libarchive-c).
    - Formats with tests:
      [7z](https://github.com/ip7z/7zip/blob/main/DOC/7zFormat.txt),
