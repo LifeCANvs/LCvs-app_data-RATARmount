@@ -1118,6 +1118,9 @@ class SQLiteIndexedTar(SQLiteIndexMountSource):
                 # Update isTar to True for the tar
                 modifiedFileInfo = list(fileInfo)
                 modifiedFileInfo[11] = isTar
+
+                modifiedFileInfo[13] = True  # is generated, i.e., does not have xattr
+
                 self.index.setFileInfo(tuple(modifiedFileInfo))
 
         fileObject.seek(oldPos)
