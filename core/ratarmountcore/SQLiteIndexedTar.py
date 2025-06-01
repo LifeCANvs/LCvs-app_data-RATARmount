@@ -47,6 +47,7 @@ from .utils import (
     CompressionError,
     ceilDiv,
     detectRawTar,
+    determineRecursionDepth,
     decodeUnpaddedBase64,
     getXdgCacheHome,
     isOnSlowDrive,
@@ -666,6 +667,7 @@ class SQLiteIndexedTar(SQLiteIndexMountSource):
         transform                    : Optional[Tuple[str, str]] = None,
         prioritizedBackends          : Optional[List[str]]       = None,
         indexMinimumFileCount        : int                       = 0,
+        recursionDepth               : Optional[int]             = None,
         # pylint: disable=unused-argument
         **kwargs
         # fmt: on
@@ -741,6 +743,11 @@ class SQLiteIndexedTar(SQLiteIndexMountSource):
         self._recursionDepth              = -1
         # fmt: on
         self.prioritizedBackends: List[str] = [] if prioritizedBackends is None else prioritizedBackends
+
+        self.maxRecursionDepth = determineRecursionDepth(recursive=recursive, recursionDepth=recursionDepth)
+        # Change the default from 0 to 1 to undo the compression layer and analyze the TAR if nothing is specified.
+        if not recursive and recursionDepth is None:
+            self.maxRecursionDepth = 1
 
         self.transform = (
             (lambda x: re.sub(self.transformPattern[0], self.transformPattern[1], x))
