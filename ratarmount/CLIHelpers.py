@@ -6,10 +6,13 @@ import os
 import tarfile
 from typing import Optional, Tuple
 
-import fsspec
-
 from ratarmountcore.compressions import checkForSplitFile, findAvailableOpen, supportedCompressions
 from ratarmountcore.utils import detectRawTar
+
+try:
+    import fsspec
+except ImportError:
+    fsspec = None  # type: ignore
 
 
 def checkInputFileType(
