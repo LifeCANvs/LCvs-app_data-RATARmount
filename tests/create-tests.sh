@@ -402,3 +402,16 @@ setfattr --name user.tags --value mytag foo
 #getfattr --dump foo
 bsdtar --numeric-owner --xattrs -cf file-with-attribute.bsd.tar foo
 tar --numeric-owner --xattrs -cf file-with-attribute.gnu.tar foo
+
+# archive-with-versions-folder.tar
+mkdir archive-with-version-folder
+(
+    cd archive-with-version-folder &&
+    echo bar > foo &&
+    mkdir foo.versions &&
+    echo bar2 > foo.versions/foo2 &&
+    echo fole > file &&
+    echo fole2 > file.versions &&
+    echo 'root file' > .versions
+)
+tar --numeric-owner --xattrs -cf archive-with-version-folder{.tar,}
