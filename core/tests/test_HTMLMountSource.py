@@ -12,7 +12,7 @@ from helpers import copy_test_file
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from ratarmountcore.mountsource.formats.html import DataURLFile, HTMLMountSource, gather_embedded_files  # noqa: E402
+from ratarmountcore.mountsource.formats.html import DataURLFile, HTMLMountSource, gather_embedded_files
 
 HTML_FILES_WITH_SINGLE_DATA_URL = [
     '<html><body><img src="{}"></body></html>',
