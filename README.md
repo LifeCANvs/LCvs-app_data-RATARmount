@@ -240,6 +240,7 @@ If a graphical user interface is wanted, give one of these a try:
  - **FAT12/FAT16/FAT32/VFAT** as provided by [PyFatFS](https://github.com/nathanhi/pyfatfs) by Nathan-J. Hirschauer. See also [Microsoft's FAT32 File System Specification](https://download.microsoft.com/download/1/6/1/161ba512-40e2-4cc9-843a-923143f3456c/fatgen103.doc).
  - **EXT4** as provided by [python-ext4](https://github.com/Eeems/python-ext4) by Nathaniel van Diepen. See also the [Linux kernel docs for EXT4](https://docs.kernel.org/filesystems/ext4/).
  - **SQLAR** via [CPython's](https://docs.python.org/3/library/sqlite3.html) [sqlite3](https://sqlite.org/) module or via the [Python3 bindings](https://github.com/coleifer/sqlcipher3) to [sqlcipher](https://www.zetetic.net/sqlcipher/) for encrypted archives.
+ - **HTML** files with embedded data URLs, such as those created by [Firefox's Save Page WE extension](https://addons.mozilla.org/en-US/firefox/addon/save-page-we/) or similar ones. The base64-encoded embedded files are exposed via the virtual file system in subfolders based on `data-src` URLs in a similar manner to the [`Page Info -> Media`](https://support.mozilla.org/en-US/kb/firefox-page-info-window#w_media) functionality.
  - **Ratarmount Indexes** can also be mounted directly without the associated archive. This can be useful for viewing the file tree hierarchy in cases where the contents are not required, e.g., to search in indexes to archives stored in cold storage. A longer term goal of mine would be some kind metadata database with computed hashes, thumbnails, and others that can be mounted and searched, similar to the [locate family of commands](https://en.wikipedia.org/wiki/Locate_(Unix)) on Linux, but for archival usage, i.e., for disconnected media, and with recursion into archives, something like [Tracker](https://wiki.ubuntu.com/Tracker) but less [intrusive](https://unix.stackexchange.com/questions/694065/how-to-really-completely-disable-gnome-tracker) and for browsing, not just searching in the metadata, something like [iRods](https://irods.org/) but less complicated. (If anyone knows of such a tool or needs help with it, please contact me, e.g., via an issue.)
  - **Many Others** as provided by [libarchive](https://github.com/libarchive/libarchive) via [python-libarchive-c](https://github.com/Changaco/python-libarchive-c).
    - Formats with tests:
@@ -686,7 +687,7 @@ Here is an example for applying modifications to a writable mount and then commi
             --file 'example.tar' 2>&1 |
            sed '/^tar: Exiting with failure/d; /^tar.*Not found in archive/d'
         tar --append -C 'zlib-wiki-overlay' --null --verbatim-files-from --files-from='/tmp/tmp_ajfo8wf/append.lst' --file 'example.tar'
-    
+
     Committing is an experimental feature!
     Please confirm by entering "commit". Any other input will cancel.
     > 
@@ -784,4 +785,22 @@ ratarmount --control-interface mounted
 echo "ratarmount -d 3 $PWD/tests/single-file.tar $HOME/mounted" > mounted/.ratarmount-control/command
 sleep 1
 cat mounted/.ratarmount-control/command
+```
+
+## HTML support
+
+HTML files with embedded data files, e.g., as saved with [Firefox's Save Page WE extension](https://addons.mozilla.org/en-US/firefox/addon/save-page-we/) can be mounted to expose these embedded files as actual files in a file hierarchy.
+This can be used to inspect resources similar to [Firefox's Page Info Window](https://support.mozilla.org/en-US/kb/firefox-page-info-window).
+
+This HTML file:
+
+```html
+<img data-savepage-src="https://example.com/logo.png"
+     src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==">
+```
+
+will be mounted as:
+```
+/mnt/html/
+└── https:/example.com/logo.png
 ```

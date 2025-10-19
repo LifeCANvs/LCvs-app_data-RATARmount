@@ -25,6 +25,7 @@ See:
 import contextlib
 import dataclasses
 import enum
+import re
 import struct
 import sys
 import tarfile
@@ -65,6 +66,7 @@ class FileFormatID(enum.Enum):
     # Other archive  formats
     RATARMOUNT_INDEX = 0x901
     WARC             = 0x902
+    HTML             = 0x903
 
     # Compression formats (compresses a single file / stream)
     BZIP2            = 0x1001
@@ -87,6 +89,28 @@ class FileFormatID(enum.Enum):
 
 
 FID = FileFormatID
+
+
+HTML_REGEX = re.compile(br"<(head|title|html|script|style|table|a\s+href)[\s>]")
+
+
+def is_html_file(fileobj: IO[bytes]) -> bool:
+    offset = fileobj.tell()
+    try:
+        # Do not read more than 512 B because else we might match the first TAR entry contents!
+        chunk = fileobj.read(512).lower()
+        if b'\x00' in chunk:
+            return False
+        # Trying to decode the chunk can be inconclusive because we may not know the encoding and
+        # because the chunk end might be inside a multi-byte UTF-8 character.
+
+        # See https://github.com/file/file/blob/FILE5_46/magic/Magdir/sgml
+        # This is a very trimmed-down heuristic. In the future, we might have to add a proper
+        # file detection dependency such as libmagic (for Python).
+        return (b'<!doctype html' in chunk) or bool(HTML_REGEX.search(chunk))
+    finally:
+        fileobj.seek(offset)
+    return False
 
 
 def is_tar(fileobj: IO[bytes], encoding: str = tarfile.ENCODING) -> bool:
@@ -367,6 +391,8 @@ ARCHIVE_FORMATS: dict[FileFormatID, FileFormatInfo] = {
     # https://www.iso.org/standard/68004.html
     # https://iipc.github.io/warc-specifications/specifications/warc-format/warc-1.1/#file-and-record-model
     FID.WARC: FileFormatInfo(['warc'], b'WARC/1.'),
+    # HTML files with embedded data URLs
+    FID.HTML: FileFormatInfo(['html', 'htm'], None, is_html_file),
 }
 
 COMPRESSION_FORMATS: dict[FileFormatID, FileFormatInfo] = {
