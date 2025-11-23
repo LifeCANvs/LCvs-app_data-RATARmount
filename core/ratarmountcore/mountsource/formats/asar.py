@@ -9,7 +9,7 @@ from typing import IO, Any, Union, cast
 from ratarmountcore.formats import find_asar_header
 from ratarmountcore.mountsource import FileInfo, MountSource
 from ratarmountcore.mountsource.SQLiteIndexMountSource import SQLiteIndexMountSource
-from ratarmountcore.SQLiteIndex import SQLiteIndex, SQLiteIndexedTarUserData
+from ratarmountcore.SQLiteIndex import SQLiteIndex
 from ratarmountcore.StenciledFile import RawStenciledFile, StenciledFile
 from ratarmountcore.utils import overrides
 
@@ -170,7 +170,4 @@ class ASARMountSource(SQLiteIndexMountSource):
 
     @overrides(MountSource)
     def open(self, fileInfo: FileInfo, buffering=-1) -> IO[bytes]:
-        assert fileInfo.userdata
-        extendedFileInfo = fileInfo.userdata[-1]
-        assert isinstance(extendedFileInfo, SQLiteIndexedTarUserData)
-        return self._open_stencil(extendedFileInfo.offset, fileInfo.size, buffering)
+        return self._open_stencil(SQLiteIndex.get_index_userdata(fileInfo.userdata).offset, fileInfo.size, buffering)

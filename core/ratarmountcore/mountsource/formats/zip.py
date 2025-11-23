@@ -8,7 +8,7 @@ from typing import IO, Union
 
 from ratarmountcore.mountsource import FileInfo, MountSource
 from ratarmountcore.mountsource.SQLiteIndexMountSource import SQLiteIndexMountSource
-from ratarmountcore.SQLiteIndex import SQLiteIndex, SQLiteIndexedTarUserData
+from ratarmountcore.SQLiteIndex import SQLiteIndex
 from ratarmountcore.utils import overrides
 
 try:
@@ -133,10 +133,7 @@ class ZipMountSource(SQLiteIndexMountSource):
     @overrides(MountSource)
     def open(self, fileInfo: FileInfo, buffering=-1) -> IO[bytes]:
         # I do not see any obvious option to zipfile.ZipFile to apply the specified buffer size.
-        assert fileInfo.userdata
-        extendedFileInfo = fileInfo.userdata[-1]
-        assert isinstance(extendedFileInfo, SQLiteIndexedTarUserData)
-        info = self.files[extendedFileInfo.offsetheader]
+        info = self.files[SQLiteIndex.get_index_userdata(fileInfo.userdata).offsetheader]
         assert isinstance(info, zipfile.ZipInfo)
         # CPython's zipfile module does handle multiple file objects being opened and reading from the
         # same underlying file object concurrently by using a _SharedFile class that even includes a lock.

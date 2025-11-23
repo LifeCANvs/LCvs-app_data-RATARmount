@@ -15,7 +15,7 @@ from ratarmountcore.compressions import COMPRESSION_BACKENDS
 from ratarmountcore.formats import FILE_FORMATS
 from ratarmountcore.mountsource import FileInfo, MountSource
 from ratarmountcore.mountsource.SQLiteIndexMountSource import SQLiteIndexMountSource
-from ratarmountcore.SQLiteIndex import SQLiteIndex, SQLiteIndexedTarUserData
+from ratarmountcore.SQLiteIndex import SQLiteIndex
 from ratarmountcore.utils import InvalidIndexError, overrides
 
 try:
@@ -504,7 +504,6 @@ class LibarchiveFile(io.RawIOBase):
         return result
 
 
-# The implementation is similar to ZipMountSource and SQLiteIndexedTarUserData.
 class LibarchiveMountSource(SQLiteIndexMountSource):
     def __init__(self, fileOrPath: Union[str, IO[bytes]], tarFileName: Optional[str] = None, **options) -> None:
         self.fileOrPath = fileOrPath
@@ -596,14 +595,11 @@ class LibarchiveMountSource(SQLiteIndexMountSource):
 
     @overrides(MountSource)
     def open(self, fileInfo: FileInfo, buffering=-1) -> IO[bytes]:
-        assert fileInfo.userdata
-        tarFileInfo = fileInfo.userdata[-1]
-        assert isinstance(tarFileInfo, SQLiteIndexedTarUserData)
         return cast(
             IO[bytes],
             LibarchiveFile(
                 self.fileOrPath,
-                tarFileInfo.offsetheader,
+                SQLiteIndex.get_index_userdata(fileInfo.userdata).offsetheader,
                 fileSize=fileInfo.size,
                 passwords=self.passwords,
                 archiveCache=self._archiveCache,

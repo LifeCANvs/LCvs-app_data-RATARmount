@@ -67,7 +67,7 @@ except ImportError:
 from ratarmountcore.formats import find_squashfs_offset
 from ratarmountcore.mountsource import FileInfo, MountSource
 from ratarmountcore.mountsource.SQLiteIndexMountSource import SQLiteIndexMountSource
-from ratarmountcore.SQLiteIndex import SQLiteIndex, SQLiteIndexedTarUserData
+from ratarmountcore.SQLiteIndex import SQLiteIndex
 from ratarmountcore.utils import overrides
 
 logger = logging.getLogger(__name__)
@@ -487,10 +487,7 @@ class SquashFSMountSource(SQLiteIndexMountSource):
         # configured in the SquashFS image. It probably makes no sense to reduce or increase that buffer size.
         # Decreasing may reduce memory usage, but with Python and other things, memory usage is not a priority
         # in ratarmount as long as it is bounded for very large archives.
-        assert fileInfo.userdata
-        extendedFileInfo = fileInfo.userdata[-1]
-        assert isinstance(extendedFileInfo, SQLiteIndexedTarUserData)
-        return self.image.open(self.image.read_inode(extendedFileInfo.offsetheader))
+        return self.image.open(self.image.read_inode(SQLiteIndex.get_index_userdata(fileInfo.userdata).offsetheader))
 
     @overrides(MountSource)
     def statfs(self) -> dict[str, Any]:

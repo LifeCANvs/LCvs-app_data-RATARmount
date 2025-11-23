@@ -1082,10 +1082,9 @@ class SQLiteIndex:
     def list_xattr(self, fileInfo: FileInfo) -> builtins.list[str]:
         if not fileInfo.userdata:
             return []
-        userData = fileInfo.userdata[-1]
-        assert isinstance(userData, SQLiteIndexedTarUserData)
 
-        if userData.isgenerated:
+        userData = fileInfo.userdata[-1]
+        if not isinstance(userData, SQLiteIndexedTarUserData) or userData.isgenerated:
             return []
 
         try:
@@ -1105,10 +1104,9 @@ class SQLiteIndex:
     def get_xattr(self, fileInfo: FileInfo, key: str) -> Optional[bytes]:
         if not fileInfo.userdata:
             return None
-        userData = fileInfo.userdata[-1]
-        assert isinstance(userData, SQLiteIndexedTarUserData)
 
-        if userData.isgenerated:
+        userData = fileInfo.userdata[-1]
+        if not isinstance(userData, SQLiteIndexedTarUserData) or userData.isgenerated:
             return None
 
         try:
@@ -1704,3 +1702,14 @@ class SQLiteIndex:
             db.execute('ALTER TABLE gzipindexes RENAME TO gzipindex;')
 
         db.commit()
+
+    @staticmethod
+    def get_index_userdata(userdata: builtins.list[Any]) -> SQLiteIndexedTarUserData:
+        if not userdata:
+            raise RatarmountError("Expected userdata in FileInfo object!")
+
+        result = userdata[-1]
+        if not isinstance(result, SQLiteIndexedTarUserData):
+            raise RatarmountError("FileInfo.userdata contains unexpected type!")
+
+        return result

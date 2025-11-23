@@ -1112,10 +1112,7 @@ class SQLiteIndexedTar(SQLiteIndexMountSource):
 
     @overrides(MountSource)
     def read(self, fileInfo: FileInfo, size: int, offset: int) -> bytes:
-        assert fileInfo.userdata
-        tarFileInfo = fileInfo.userdata[-1]
-        assert isinstance(tarFileInfo, SQLiteIndexedTarUserData)
-
+        tarFileInfo = SQLiteIndex.get_index_userdata(fileInfo.userdata)
         if tarFileInfo.issparse:
             with self.open(fileInfo) as file:
                 file.seek(offset, os.SEEK_SET)
