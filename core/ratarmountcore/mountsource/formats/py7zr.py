@@ -113,7 +113,7 @@ class Py7zrMountSource(SQLiteIndexMountSource):
     def _convert_to_row(self, info) -> tuple:
         mode = 0o777 | (stat.S_IFDIR if info.is_directory else stat.S_IFREG)
         mtime = info.creationtime.timestamp()
-        path, name = SQLiteIndex.normpath(info.filename).rsplit("/", 1)
+        path, name = SQLiteIndex.normpath(self.transform(info.filename)).rsplit("/", 1)
 
         # fmt: off
         fileInfo : tuple = (
