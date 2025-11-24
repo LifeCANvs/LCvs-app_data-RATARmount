@@ -67,6 +67,11 @@ def test_format_detection():
                 if extension != 'sqlar' and FileFormatID.SQLAR in formats:
                     formats.remove(FileFormatID.SQLAR)
 
+                # Deflate format detection can throw quite a lot of false positives because only 1 bit is checked
+                # in the worst case.
+                if extension != 'deflate' and FileFormatID.DEFLATE in formats:
+                    formats.remove(FileFormatID.DEFLATE)
+
                 # The name should be self-explanatory. Do not test for it being recognized as ZIP
                 # because it is not a bug if it is not recognized as such.
                 if name == 'rar-misrecognized-as-zip.rar' and FileFormatID.ZIP in formats:

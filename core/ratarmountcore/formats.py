@@ -22,12 +22,17 @@ See:
  - https://en.wikipedia.org/wiki/List_of_archive_formats
 """
 
+import contextlib
 import dataclasses
 import enum
 import struct
+import sys
 import tarfile
 import zipfile
 from typing import IO, Callable, Optional, Union
+
+with contextlib.suppress(ImportError):
+    import rapidgzip
 
 try:
     import sqlcipher3  # noqa: F401
@@ -69,6 +74,7 @@ class FileFormatID(enum.Enum):
     ZLIB             = 0x1005
     LZ4              = 0x1006
     LZMA             = 0x1007
+    DEFLATE          = 0x1008
 
     GRZIP            = 0x1021
     LRZIP            = 0x1022
@@ -241,6 +247,29 @@ def _check_zlib_header(fileobj: IO[bytes]) -> bool:
     return not usesDictionary
 
 
+def _check_deflate(fileobj: IO[bytes]) -> bool:
+    if 'rapidgzip' not in sys.modules:
+        return False
+
+    determineFileType = getattr(rapidgzip, 'determineFileType', None)
+    if not callable(determineFileType):
+        return False
+
+    if determineFileType(fileobj).lower() != 'deflate':
+        return False
+
+    try:
+        # determineFileType only checks the header, which is almost nothing for 'deflate'.
+        # Therefore try to read a bit.
+        with rapidgzip.RapidgzipFile(fileobj, parallelization=1, chunk_size=128 * 1024) as file:
+            file.read(108 * 1024)  # Read a bit less than the chunk size.
+        return True
+    except Exception:
+        pass
+
+    return False
+
+
 def _is_bzip2(fileobj: IO[bytes]) -> bool:
     return fileobj.read(4)[:3] == b'BZh' and fileobj.read(6) == (0x314159265359).to_bytes(6, 'big')
 
@@ -346,6 +375,7 @@ COMPRESSION_FORMATS: dict[FileFormatID, FileFormatInfo] = {
     FID.XZ: FileFormatInfo(['xz'], b"\xfd7zXZ\x00"),
     FID.ZSTANDARD: FileFormatInfo(['zst', 'zstd', 'pzstd'], None, _check_zstandard_header),
     FID.ZLIB: FileFormatInfo(['zz', 'zlib'], None, _check_zlib_header),
+    FID.DEFLATE: FileFormatInfo(['deflate'], None, _check_deflate),
     # https://github.com/libarchive/libarchive/blob/6110e9c82d8ba830c3440f36b990483ceaaea52c/libarchive/
     # archive_read_support_filter_grzip.c#L46
     # It is almost impossible to find the original sources or a specification:

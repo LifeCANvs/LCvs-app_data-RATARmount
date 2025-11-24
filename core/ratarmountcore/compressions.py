@@ -104,7 +104,7 @@ COMPRESSION_BACKENDS: dict[str, CompressionBackendInfo] = {
     ),
     'rapidgzip': CompressionBackendInfo(
         (lambda x, parallelization=1: rapidgzip.RapidgzipFile(x, parallelization=parallelization)),
-        {FID.GZIP, FID.ZLIB},
+        {FID.GZIP, FID.ZLIB, FID.DEFLATE},
         [('rapidgzip', 'rapidgzip')],
         'tarfile',
     ),
