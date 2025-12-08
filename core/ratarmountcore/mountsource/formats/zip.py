@@ -4,6 +4,7 @@ import logging
 import stat
 import sys
 import zipfile
+from pathlib import Path
 from typing import IO, Union
 
 from ratarmountcore.mountsource import FileInfo, MountSource
@@ -23,10 +24,12 @@ logger = logging.getLogger(__name__)
 
 
 class ZipMountSource(SQLiteIndexMountSource):
-    def __init__(self, fileOrPath: Union[str, IO[bytes]], **options) -> None:
+    def __init__(self, fileOrPath: Union[str, IO[bytes], Path], **options) -> None:
         if 'zipfile' not in sys.modules:
             raise RuntimeError("Did not find the zipfile module. Please use Python 3.7+.")
 
+        if isinstance(fileOrPath, Path):
+            fileOrPath = str(fileOrPath)
         self.fileObject = zipfile.ZipFile(fileOrPath, 'r')
 
         ZipMountSource._find_password(self.fileObject, options.get("passwords", []))
