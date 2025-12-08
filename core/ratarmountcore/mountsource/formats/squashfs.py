@@ -459,9 +459,10 @@ class SquashFSMountSource(SQLiteIndexMountSource):
             fileInfos.append(self._convert_to_row(inodeOffset, info))
         self.index.set_file_infos(fileInfos)
 
+    @overrides(SQLiteIndexMountSource)
     def close(self) -> None:
-        if hasattr(self, 'rawFileObject'):
-            self.rawFileObject.close()
+        if rawFileObject := getattr(self, 'rawFileObject', None):
+            rawFileObject.close()
 
         # There is no "closed" method and it can only be closed once, else we get:
         # PySquashfsImage/__init__.py", line 131, in close
@@ -470,11 +471,6 @@ class SquashFSMountSource(SQLiteIndexMountSource):
         # AttributeError: 'NoneType' object has no attribute 'close'
         with contextlib.suppress(AttributeError):
             self.image.close()  # pytype: disable=attribute-error
-
-    @overrides(SQLiteIndexMountSource)
-    def __exit__(self, exception_type, exception_value, exception_traceback) -> None:
-        super().__exit__(exception_type, exception_value, exception_traceback)
-        self.close()
 
     def __del__(self):
         self.close()

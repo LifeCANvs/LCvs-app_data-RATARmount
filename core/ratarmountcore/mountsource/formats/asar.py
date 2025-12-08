@@ -151,8 +151,8 @@ class ASARMountSource(SQLiteIndexMountSource):
             self.index.set_file_infos(fileInfos)
 
     @overrides(SQLiteIndexMountSource)
-    def __exit__(self, exception_type, exception_value, exception_traceback):
-        super().__exit__(exception_type, exception_value, exception_traceback)
+    def close(self) -> None:
+        super().close()
         if not self.isFileObject:
             self.fileObject.close()
 

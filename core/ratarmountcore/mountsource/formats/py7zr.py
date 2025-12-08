@@ -167,9 +167,10 @@ class Py7zrMountSource(SQLiteIndexMountSource):
         raise RuntimeError("Could not find a matching password!")
 
     @overrides(SQLiteIndexMountSource)
-    def __exit__(self, exception_type, exception_value, exception_traceback):
-        super().__exit__(exception_type, exception_value, exception_traceback)
-        self.fileObject.close()
+    def close(self) -> None:
+        super().close()
+        if fileObject := getattr(self, 'fileObject', None):
+            fileObject.close()
 
     @overrides(MountSource)
     def open(self, fileInfo: FileInfo, buffering=-1) -> IO[bytes]:

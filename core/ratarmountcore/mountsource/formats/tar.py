@@ -769,17 +769,15 @@ class SQLiteIndexedTar(SQLiteIndexMountSource):
 
         return False
 
-    def close(self):
-        if self.tarFileObject:
-            self.tarFileObject.close()
+    @overrides(SQLiteIndexMountSource)
+    def close(self) -> None:
+        super().close()
+
+        if tarFileObject := getattr(self, 'tarFileObject', None):
+            tarFileObject.close()
 
         if not self.isFileObject and self.rawFileObject:
             self.rawFileObject.close()
-
-    @overrides(MountSource)
-    def __exit__(self, exception_type, exception_value, exception_traceback):
-        self.close()
-        super().__exit__(exception_type, exception_value, exception_traceback)
 
     def _get_archive_path(self) -> Optional[str]:
         return None if self.tarFileName == '<file object>' else self.tarFileName
