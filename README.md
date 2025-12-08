@@ -67,6 +67,7 @@ A complete list of supported formats can be found [here](supported-formats).
    3. [System Dependencies for PIP Installation (Rarely Necessary)](#system-dependencies-for-pip-installation-rarely-necessary)
    4. [PIP Package Installation](#pip-package-installation)
    5. [Argument Completion](#argument-completion)
+   6. [Graphical User Interface (GUI)](#graphical-user-interface-gui)
 2. [Supported Formats](#supported-formats)
    1. [TAR compressions supported for random access](tar-compressions-supported-for-random-access)
    2. [Other supported archive formats](other-supported-archive-formats)
@@ -209,6 +210,15 @@ activate-global-python-argcomplete  # Requires a restart of your shell to.
 
 ratarmount --<tab><tab>
 ```
+
+
+## Graphical User Interface (GUI)
+
+If a graphical user interface is wanted, give one of these a try:
+
+ - [Ratarmount UI](https://github.com/jendap/ratarmount_ui): Created by Jan Prach based on GTK4, and with Gnome Nautilus integration
+ - A work-in-progress Qt-based Ratarmount GUI by me is available on the [gui](https://github.com/mxmlnkn/ratarmount/tree/gui) branch. It can be installed with `pip install --user --force-reinstall \
+    'git+https://github.com/mxmlnkn/ratarmount.git@gui#egginfo=ratarmount'{'core&subdirectory=core',}` and run with `ratarmount --gui <archive>`. It is still very experimental, but basic functionality should work. Feedback would be welcome.
 
 
 # Supported Formats
