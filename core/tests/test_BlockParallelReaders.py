@@ -12,11 +12,12 @@ import sys
 from pathlib import Path
 from typing import IO
 
-import indexed_zstd
 import pytest
 import xz
 
 try:
+    import indexed_zstd
+
     # May not be installed with Python 3.14 because of incompatibilities.
     import zstandard
 except ImportError:
@@ -198,6 +199,7 @@ class SeekableZstd:
 
 
 @pytest.mark.parallel
+@pytest.mark.skipif(sys.platform == "win32", reason="Need to find out how to properly install indexed_zstd on Windows.")
 @pytest.mark.parametrize("parallelization", [1, 2, 3, os.cpu_count()])
 class TestParallelZstdReader:
     @staticmethod

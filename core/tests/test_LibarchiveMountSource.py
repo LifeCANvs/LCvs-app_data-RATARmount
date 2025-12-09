@@ -19,6 +19,7 @@ from ratarmountcore.mountsource.formats.libarchive import IterableArchive, Libar
 
 
 @pytest.mark.parallel
+@pytest.mark.skipif(sys.platform == "win32", reason="Need to find out how to properly install libarchive on Windows.")
 class TestLibarchiveMountSource:
     @staticmethod
     @pytest.mark.parametrize('compression', ['7z', 'rar', 'zip'])

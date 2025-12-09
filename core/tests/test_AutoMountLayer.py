@@ -37,6 +37,7 @@ class TestAutoMountLayer:
             assert recursivelyMounted.open(recursivelyMounted.lookup('/ufo_00/ufo')).read() == b'iriya\n'
 
     @staticmethod
+    @pytest.mark.skipif(sys.platform == "win32", reason="Not yet working on Windows")  # TODO Fix on Windows
     def test_regex_mount_point_tar_gz(parallelization):
         options = {
             'clearIndexCache': True,
@@ -60,6 +61,7 @@ class TestAutoMountLayer:
             assert recursivelyMounted.open(recursivelyMounted.lookup('/ufo_00/ufo')).read() == b'iriya\n'
 
     @staticmethod
+    @pytest.mark.skipif(sys.platform == "win32", reason="Not yet working on Windows")  # TODO Fix on Windows
     def test_regex_mount_point_gz(parallelization):
         options = {
             'clearIndexCache': True,
@@ -143,6 +145,7 @@ class TestAutoMountLayer:
             # assert recursivelyMounted.open(recursivelyMounted.lookup('/ufo_00/ufo')).read() == b'iriya\n'
 
     @staticmethod
+    @pytest.mark.skipif(sys.platform == "win32", reason="Not yet working on Windows")  # TODO Fix on Windows
     @pytest.mark.parametrize("recursive", [False])
     @pytest.mark.parametrize("maxRecursionDepth", range(7))
     def test_recursion_depth(parallelization, recursive, maxRecursionDepth):

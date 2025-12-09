@@ -1,5 +1,6 @@
 import builtins
 import os
+import shutil
 import stat
 from collections.abc import Iterable
 from typing import IO, Any, Optional, Union
@@ -45,17 +46,18 @@ class FolderMountSource(MountSource):
 
     @staticmethod
     def _get_statfs_for_folder(path: str):
-        result = os.statvfs(path)
+        statvfs = None if os.name == 'nt' else os.statvfs(path)
+        total, _used, _free = shutil.disk_usage(path)
         return {
-            'f_bsize': result.f_bsize,
-            'f_frsize': result.f_frsize,
-            'f_blocks': result.f_blocks,
+            'f_bsize': statvfs.f_bsize if statvfs else 512,
+            'f_frsize': statvfs.f_frsize if statvfs else 512,
+            'f_blocks': statvfs.f_blocks if statvfs else total // 512,
             'f_bfree': 0,
             'f_bavail': 0,
-            'f_files': result.f_files,
+            'f_files': statvfs.f_files if statvfs else 0,
             'f_ffree': 0,
             'f_favail': 0,
-            'f_namemax': result.f_namemax,
+            'f_namemax': statvfs.f_namemax if statvfs else 1024,
         }
 
     def _realpath(self, path: str) -> str:
