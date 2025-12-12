@@ -54,6 +54,7 @@ class FileFormatID(enum.Enum):
     AR               = 0x107
     XAR              = 0x108
     CPIO             = 0x109
+    AR_THIN          = 0x110
     # "TAR"-like compression formats without compression
     TAR              = 0x201
     ASAR             = 0x202
@@ -374,7 +375,8 @@ ARCHIVE_FORMATS: dict[FileFormatID, FileFormatInfo] = {
     FID.AIX_SMALL: FileFormatInfo(['ar'], b'<aiaff>\n'),
     # https://www.ibm.com/docs/en/aix/7.2.0?topic=formats-ar-file-format-big#ar_big
     # https://en.wikipedia.org/wiki/Ar_(Unix)
-    FID.AR: FileFormatInfo(['a', 'ar', 'lib'], b'!<arch>\n'),
+    FID.AR: FileFormatInfo(['a', 'ar', 'lib', 'deb'], b'!<arch>\n'),
+    FID.AR_THIN: FileFormatInfo(['a', 'ar', 'lib'], b'!<thin>\n'),
     FID.XAR: FileFormatInfo(['xar'], b'xar!'),
     FID.CPIO: FileFormatInfo(['cpio'], None, _is_cpio),
     # "TAR"-like compression formats without compression

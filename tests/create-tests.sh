@@ -627,3 +627,67 @@ for sparseVersion in '1.0' '0.1' '0.0'; do
         sparse.pax.sparse-$sparseVersion.tar sparse-512B sparse-513B sparse-1MiB
 done
 $TAR --format=gnu --hole-detection=raw -S -cf sparse.gnu.tar sparse-512B sparse-513B sparse-1MiB
+
+
+# AR
+echo foo > bar
+echo foo9 > 1bar
+head -c $(( 32 * 1024 )) < /dev/zero > zeros-32KiB
+echo "Oh no!" > $'Datei enthält $Sonderzeichen\nZeichen!?'
+mkdir -p folder
+echo nested > folder/nested-file
+rm -f -- *.ar
+ar -r ar-GNU.ar bar 1bar zeros-32KiB $'Datei enthält $Sonderzeichen\nZeichen!?' folder/nested-file
+# r[ab][f][u]  - replace existing or insert new file(s) into the archive
+# [f] - truncate inserted file names
+# [U] - use actual timestamps and uids/gids
+# [s] - create an archive index (cf. ranlib)
+# p   - print file(s) found in the archive
+ar -p ar-GNU.ar
+# foo
+# Oh no!
+# nested
+# -> Lovely, how GNU ar can create files with filenames that it cannot correctly parse itself.
+bsdtar --list -f ar-GNU.ar
+# //
+# bar
+# zeros-32KiB
+# Datei enthält $Sonderzeichen\nZeichen!?
+# nested-file
+
+# Skip zeros-32KiB to keep the total size somewhat manageable.
+ar -r -f ar-GNU-truncated.ar bar 1bar $'Datei enthält $Sonderzeichen\nZeichen!?' folder/nested-file
+# bsdtar --list -f ar-GNU-truncated.ar
+# bar
+# Datei enthält
+# nested-file
+
+bsdtar -c --format=ar -f ar-bsdtar.ar bar 1bar zeros-32KiB $'Datei enthält $Sonderzeichen\nZeichen!?' folder/nested-file
+bsdtar --list -f ar-bsdtar.ar
+# bar
+# zeros-32KiB
+# Datei enthält $Sonderzeichen\nZeichen!?
+# nested-file
+for format in gnu darwin bsd bigarchive coff; do
+    llvm-ar-19 -r --format=$format "ar-llvm-19-$format.ar" \
+        bar 1bar $'Datei enthält $Sonderzeichen\nZeichen!?' folder/nested-file
+done
+llvm-ar-19 -r --thin "ar-llvm-19-thin.ar" bar 1bar $'Datei enthält $Sonderzeichen\nZeichen!?' folder/nested-file
+
+echo 'int f() { return 1; }; int main() { return 0; }' > main.c
+gcc -c -o main.o main.c
+ar -r ar-GCC-main.a main.o
+
+# Make DEB archive
+mkdir -p pkgroot/DEBIAN
+cat <<EOF > pkgroot/DEBIAN/control
+Package: testpkg
+Version: 0.0.1
+Architecture: all
+Maintainer: You <you@example.com>
+Description: Dummy package for parser tests
+EOF
+mkdir -p pkgroot/usr/share/doc/testpkg
+touch pkgroot/usr/share/doc/testpkg/empty
+chmod 755 pkgroot/DEBIAN/control
+dpkg-deb --build pkgroot testpkg_0.0.1_all.deb

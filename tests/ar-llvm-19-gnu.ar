@@ -1,0 +1,16 @@
+!<arch>
+//                                              42        `
+Datei enthält $Sonderzeichen
+Zeichen!?/
+
+bar/            0           0     0     644     4         `
+foo
+1bar/           0           0     0     644     5         `
+foo9
+
+/0              0           0     0     644     7         `
+Oh no!
+
+nested-file/    0           0     0     644     7         `
+nested
+

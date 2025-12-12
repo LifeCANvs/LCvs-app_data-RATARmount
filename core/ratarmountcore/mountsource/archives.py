@@ -5,6 +5,7 @@ from typing import IO, Any, Callable, Optional, Union
 from ratarmountcore.formats import FileFormatID
 
 from . import MountSource
+from .formats.ar import ARMountSource
 from .formats.asar import ASARMountSource
 from .formats.ext4 import EXT4MountSource
 from .formats.fat import FATMountSource
@@ -80,6 +81,7 @@ class ArchiveBackendInfo:
 # file format checkers returns True!
 # The keys are the backend names the user can specify with --backends or via prioritizedBackends arguments.
 ARCHIVE_BACKENDS: dict[str, ArchiveBackendInfo] = {
+    "ar": ArchiveBackendInfo(ARMountSource, {FID.AR, FID.AR_THIN}, []),
     "rarfile": ArchiveBackendInfo(RarMountSource, {FID.RAR}, [('rarfile', 'rarfile')]),
     "tarfile": ArchiveBackendInfo(
         _open_tar_mount_source,
@@ -104,7 +106,6 @@ ARCHIVE_BACKENDS: dict[str, ArchiveBackendInfo] = {
     "libarchive": ArchiveBackendInfo(
         _open_libarchive_mount_source,
         {
-            FID.AR,
             FID.CAB,
             FID.XAR,
             FID.CPIO,
