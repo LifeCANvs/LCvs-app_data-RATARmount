@@ -224,6 +224,7 @@ def parsed_args_to_options(args) -> dict[str, Any]:
     return {
         'pathToMount'                  : args.mount_source,
         'clearIndexCache'              : bool(args.recreate_index),
+        'readOnlyIndex'                : not args.recreate_index and args.recreate_index is not None,
         'recursive'                    : bool(args.recursive),
         'recursionDepth'               : args.recursion_depth,
         'gzipSeekPointSpacing'         : int(args.gzipSeekPointSpacing),

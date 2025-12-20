@@ -216,8 +216,15 @@ For further information, see the ReadMe on the project's homepage:
     # Index Options
 
     indexGroup.add_argument(
-        '-c', '--recreate-index', action=argparse.BooleanOptionalAction, default=False,
-        help='If specified, pre-existing .index files will be deleted and newly created.')
+        '-c', '--recreate-index', action=argparse.BooleanOptionalAction, default=None,
+        help='If specified, pre-existing .index files will be deleted and newly created. '
+             'If --no-recreate-index is specified, never create or modify indexes. Only use existing ones as is. '
+             'By default, indexes will be created and modified if they are found to be erroneous, '
+             'see --recreate-index-on-error to restore that default.')
+
+    indexGroup.add_argument(
+        '--recreate-index-on-errors', action='store_const', const=None, dest='recreate_index',
+        help='Restores the default behavior of (re)creating indexes on errors and when no index exists.')
 
     indexGroup.add_argument(
         '--verify-mtime', action=argparse.BooleanOptionalAction, default=False,

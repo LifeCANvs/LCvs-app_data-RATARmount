@@ -1192,6 +1192,23 @@ class SQLiteIndexedTar(SQLiteIndexMountSource):
                 f"is older than the one stored in the SQLite index ({archiveStats.st_mtime!s})",
             )
 
+        # Note that the xz compressed version of 100k zero-byte files is only ~200KB!
+        # But this should be an edge-case and with a compression ratio of ~2, even compressed archives
+        # of this size should not take more than 10s, so pretty negligible in my opinion.
+        #
+        # For compressed archives, detecting appended archives does not help much because the bottleneck is
+        # the decompression not the indexing of files. And because rapidgzip and indexed_gzip probably
+        # assume that the index is complete once import_index has been called, we have to recreate the full
+        # block offsets anyway.
+        if self.compression:
+            raise InvalidIndexError(
+                f"Compressed TAR file for this SQLite index has changed size from "
+                f"{storedStats['st_size']} to {archiveStats.st_size}. It cannot be treated as appended."
+            )
+
+        if self.index.readOnly:
+            return
+
         # Checking is expensive and would basically do the same work as creating the database anyway.
         # Therefore, only bother with the added complexity and uncertainty of the randomized index check
         # if the additional part to analyze makes up less than 66% of the total archive.
@@ -1216,20 +1233,6 @@ class SQLiteIndexedTar(SQLiteIndexMountSource):
             raise InvalidIndexError(
                 f"TAR file for this SQLite index has more than tripled in size from "
                 f"{storedStats['st_size']} to {archiveStats.st_size}"
-            )
-
-        # Note that the xz compressed version of 100k zero-byte files is only ~200KB!
-        # But this should be an edge-case and with a compression ratio of ~2, even compressed archives
-        # of this size should not take more than 10s, so pretty negligible in my opinion.
-        #
-        # For compressed archives, detecting appended archives does not help much because the bottleneck is
-        # the decompression not the indexing of files. And because rapidgzip and indexed_gzip probably
-        # assume that the index is complete once import_index has been called, we have to recreate the full
-        # block offsets anyway.
-        if self.compression:
-            raise InvalidIndexError(
-                f"Compressed TAR file for this SQLite index has changed size from "
-                f"{storedStats['st_size']} to {archiveStats.st_size}. It cannot be treated as appended."
             )
 
         if self.index.get_index_version() != SQLiteIndex.__version__:

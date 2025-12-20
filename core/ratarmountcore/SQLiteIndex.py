@@ -274,7 +274,7 @@ class SQLiteIndex:
         indexMinimumFileCount: int = 0,
         backendName: str = '',
         ignoreCurrentFolder: bool = False,
-        deleteInvalidIndexes: bool = True,
+        readOnlyIndex: bool = False,
         **_,
     ):
         """
@@ -300,6 +300,8 @@ class SQLiteIndex:
         ignoreCurrentFolder
             If true, then do not store the index into the current path. This was introduced for URL
             opened as file objects but may be useful for any archive given via a file object.
+        readOnlyIndex
+            Never delete or modify existing indexes nor create new ones. Open indexes read-only from the start.
         """
 
         self.sqlConnection: Optional[sqlite3.Connection] = None
@@ -310,7 +312,7 @@ class SQLiteIndex:
         # This is true if the index file found was compressed or an URL and had to be downloaded
         # and/or extracted into a temporary folder.
         self.indexFilePathDeleteOnClose = False
-        self.deleteInvalidIndexes = deleteInvalidIndexes
+        self.readOnly = readOnlyIndex
         self.encoding = encoding
         # stores which parent folders were last tried to add to database and therefore do exist
         self.parentFolderCache: list[tuple[str, str]] = []
@@ -412,19 +414,23 @@ class SQLiteIndex:
             if os.path.isfile(indexPath):
                 os.remove(indexPath)
 
-    def open_existing(self, checkMetadata: Optional[Callable[[dict[str, Any]], None]] = None, readOnly: bool = False):
+    def open_existing(self, checkMetadata: Optional[Callable[[dict[str, Any]], None]] = None):
         """Tries to find an already existing index."""
         for indexPath in self.possibleIndexFilePaths:
-            if self._try_load_index(indexPath, checkMetadata=checkMetadata, readOnly=readOnly):
+            if self._try_load_index(indexPath, checkMetadata=checkMetadata):
                 break
 
     def open_in_memory(self):
         self.indexFilePath, self.sqlConnection = SQLiteIndex._open_path(':memory:')
 
     def open_writable(self):
+        if self.readOnly:
+            return
+
         if self.possibleIndexFilePaths and not self.preferMemory:
             for indexPath in self.possibleIndexFilePaths:
-                if SQLiteIndex._path_is_writable(indexPath) and SQLiteIndex._path_can_be_used_for_sqlite(indexPath):
+                # This test will trash indexPath because of the write test!
+                if SQLiteIndex._path_can_be_used_for_sqlite(indexPath):
                     self.indexFilePath, self.sqlConnection = SQLiteIndex._open_path(indexPath)
                     break
         else:
@@ -768,6 +774,7 @@ class SQLiteIndex:
         uriPath = urllib.parse.quote(self.indexFilePath)
         # check_same_thread=False can be used because it is read-only anyway and it allows to enable FUSE multithreading
         self.sqlConnection = SQLiteIndex._open_sql_db(f"file:{uriPath}?mode=ro", uri=True, check_same_thread=False)
+        self.readOnly = True
 
     def _reload_index_on_disk(self):
         logger.info("Try to reopen SQLite database on disk at: %s", self.indexFilePath)
@@ -863,6 +870,9 @@ class SQLiteIndex:
         if self.index_is_loaded():
             self.reload_index_read_only()
             return
+
+        if self.readOnly:
+            raise InvalidIndexError("Unable to find an existing index to use and index (re)creation is disabled!")
 
         if isFileObject is None:
             isFileObject = self.archiveFilePath is None
@@ -1274,9 +1284,7 @@ class SQLiteIndex:
             self.indexFilePath = indexFilePath
             self.indexFilePathDeleteOnClose = deleteOnClose
 
-    def _load_index(
-        self, indexFilePath: str, checkMetadata: Optional[Callable[[dict[str, Any]], None]], readOnly: bool = False
-    ) -> None:
+    def _load_index(self, indexFilePath: str, checkMetadata: Optional[Callable[[dict[str, Any]], None]]) -> None:
         """
         Loads the given index SQLite database and checks it for validity raising an exception if it is invalid.
 
@@ -1287,6 +1295,8 @@ class SQLiteIndex:
         """
         if self.index_is_loaded():
             return
+
+        # TODO The part about support for compressed/remote SQLite files could be extracted into a standalone function!
 
         # Download and/or extract the file to a temporary file if necessary.
 
@@ -1355,7 +1365,7 @@ class SQLiteIndex:
 
         # Done downloading and/or extracting the SQLite index.
 
-        if readOnly:
+        if self.readOnly:
             uriPath = urllib.parse.quote(temporaryIndexFilePath)
             # check_same_thread=False can be used because it is read-only and it allows to enable FUSE multithreading
             self.sqlConnection = SQLiteIndex._open_sql_db(f"file:{uriPath}?mode=ro", uri=True, check_same_thread=False)
@@ -1441,7 +1451,6 @@ class SQLiteIndex:
         self,
         indexFilePath: str,
         checkMetadata: Optional[Callable[[dict[str, Any]], None]] = None,
-        readOnly: bool = False,
     ) -> bool:
         """Calls loadIndex if index is not loaded already and provides extensive error handling."""
 
@@ -1449,7 +1458,7 @@ class SQLiteIndex:
             return True
 
         try:
-            self._load_index(indexFilePath, checkMetadata=checkMetadata, readOnly=readOnly)
+            self._load_index(indexFilePath, checkMetadata=checkMetadata)
         except MismatchingIndexError as e:
             raise e
         except Exception as exception:
@@ -1475,7 +1484,7 @@ class SQLiteIndex:
             logger.warning("e.g., by opening an issue on the public github page.")
 
             try:
-                if self.deleteInvalidIndexes and '://' not in indexFilePath:
+                if not self.readOnly and '://' not in indexFilePath:
                     os.remove(indexFilePath)
             except OSError:
                 logger.warning(

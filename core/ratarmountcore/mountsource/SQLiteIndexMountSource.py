@@ -72,7 +72,7 @@ class SQLiteIndexMountSource(MountSource):
                 self.indexFilePath = self._temporaryFile.name
 
             # Encoding is only used for set_file_infos, so we are fine not forwarding it.
-            self.index = SQLiteIndex(indexFilePath=self.indexFilePath, indexFolders=[], deleteInvalidIndexes=False)
+            self.index = SQLiteIndex(indexFilePath=self.indexFilePath, indexFolders=[], readOnly=True)
 
         # Initialize members before using checkMetadata because it might to try to use those.
         self.archiveFilePath = self.index.archiveFilePath
@@ -82,7 +82,7 @@ class SQLiteIndexMountSource(MountSource):
         if index is None:
             self.index.open_existing(checkMetadata=checkMetadata or self._check_metadata)
         else:
-            self.index.open_existing(checkMetadata=checkMetadata or self._check_metadata_dummy, readOnly=True)
+            self.index.open_existing(checkMetadata=checkMetadata or self._check_metadata_dummy)
             if not self.index.index_is_loaded():
                 raise RatarmountError(f"Specified file {self.indexFilePath} is not a valid Ratarmount index.")
 
