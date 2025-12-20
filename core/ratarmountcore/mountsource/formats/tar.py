@@ -1029,9 +1029,7 @@ class SQLiteIndexedTar(SQLiteIndexMountSource):
 
     @overrides(MountSource)
     def open(self, fileInfo: FileInfo, buffering=-1) -> IO[bytes]:
-        assert fileInfo.userdata
-        tarFileInfo = fileInfo.userdata[-1]
-        assert isinstance(tarFileInfo, SQLiteIndexedTarUserData)
+        tarFileInfo = SQLiteIndex.get_index_userdata(fileInfo.userdata)
 
         # This is not strictly necessary but it saves two file object layers and therefore might be more performant.
         # Furthermore, non-sparse files should be the much more likely case anyway.
