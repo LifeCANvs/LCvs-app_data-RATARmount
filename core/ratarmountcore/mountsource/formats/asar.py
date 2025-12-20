@@ -4,6 +4,7 @@ import logging
 import os
 import stat
 import threading
+from pathlib import Path
 from typing import IO, Any, Union, cast
 
 from ratarmountcore.formats import find_asar_header
@@ -64,7 +65,9 @@ logger = logging.getLogger(__name__)
 #
 # There are no permissions, symbolic links (but hard links are possible), or file times.
 class ASARMountSource(SQLiteIndexMountSource):
-    def __init__(self, fileOrPath: Union[str, IO[bytes]], **options) -> None:
+    def __init__(self, fileOrPath: Union[str, IO[bytes], Path], **options) -> None:
+        if isinstance(fileOrPath, Path):
+            fileOrPath = str(fileOrPath)
         self.isFileObject = not isinstance(fileOrPath, str)
         self.fileObject = open(fileOrPath, 'rb') if isinstance(fileOrPath, str) else fileOrPath
 
