@@ -83,8 +83,6 @@ logger = logging.getLogger(__name__)
 
 class Py7zrMountSource(SQLiteIndexMountSource):
     def __init__(self, fileOrPath: Union[str, IO[bytes]], **options) -> None:
-        # TODO For now, 'transform' is not supported because we need the exact path to open the file and there
-        #      currently is no SQLite table column to store this information in.
         # TODO I doubt that symbolic links work because py7zr.FileInfo does not have information regarding links.
 
         def open_file(password: Optional[Union[str, bytes]] = None):
@@ -171,6 +169,10 @@ class Py7zrMountSource(SQLiteIndexMountSource):
         super().close()
         if fileObject := getattr(self, 'fileObject', None):
             fileObject.close()
+            # Throws: AttributeError: 'SevenZipFile' object has no attribute 'worker'
+            # on double close and has no 'closed' method -.-, so we have to keep track of it ourselves by
+            # setting it to None after it was closed.
+            self.fileObject = None
 
     @overrides(MountSource)
     def open(self, fileInfo: FileInfo, buffering=-1) -> IO[bytes]:
