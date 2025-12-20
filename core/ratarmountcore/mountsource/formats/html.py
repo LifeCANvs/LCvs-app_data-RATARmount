@@ -436,7 +436,6 @@ class HTMLMountSource(SQLiteIndexMountSource):
             if isinstance(fileOrPath, str)
             else io.TextIOWrapper(fileOrPath, encoding=encoding)
         )
-        files = gather_embedded_files(self.fileObject)
 
         indexOptions = {
             'archiveFilePath': fileOrPath if isinstance(fileOrPath, str) else None,
@@ -444,7 +443,11 @@ class HTMLMountSource(SQLiteIndexMountSource):
             'encoding': encoding,
         }
         super().__init__(**(options | indexOptions))
-        self._finalize_index(lambda: self.index.set_file_infos([self._convert_to_row(file) for file in files]))
+        self._finalize_index(
+            lambda: self.index.set_file_infos(
+                [self._convert_to_row(file) for file in gather_embedded_files(self.fileObject)]
+            )
+        )
 
     def _convert_to_row(self, file: EmbeddedFile):
         url_file = self._open_with_span(file.span[0], file.span[1])
