@@ -101,7 +101,7 @@ jobs:
 
     - name: Test Simple Mount
       run: |
-        ratarmount tests/single-file.tar mimi
+        ratarmount -d 3 tests/single-file.tar mimi
         ls -la mimi
         sleep 1s
         ratarmount -u mimi

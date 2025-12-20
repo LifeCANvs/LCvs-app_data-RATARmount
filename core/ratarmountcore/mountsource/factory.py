@@ -340,7 +340,7 @@ def open_mount_source(fileOrPath: Union[str, IO[bytes], os.PathLike], **options)
 
             # Do some file type checks first.
             if backend.formats and not any(might_be_format(file, fid) for fid in backend.formats):
-                logger.info(
+                logger.debug(
                     "Skipping archive backend: %s because magic byte check for all formats (%s) failed",
                     name,
                     backend.formats,
