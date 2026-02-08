@@ -2,7 +2,7 @@ Usage: ratarmount
                   [-h | -u | --commit-overlay | -v | --oss-attributions-short | --oss-attributions]
                   [--mount | --no-mount] [-r | --recursive | --no-recursive]
                   [-P PARALLELIZATION] [--password PASSWORD] [-w WRITE_OVERLAY]
-                  [-c | --recreate-index | --no-recreate-index]
+                  [-c | --recreate-index | --no-recreate-index] [--recreate-index-on-errors]
                   [--verify-mtime | --no-verify-mtime] [--index-file INDEX_FILE]
                   [--index-folders INDEX_FOLDERS] [--recursion-depth RECURSION_DEPTH]
                   [-l | --lazy | --no-lazy]
@@ -106,6 +106,9 @@ Index Options:
                         ,~/.cache/ratarmount,~/.ratarmount)
   --mount, --no-mount   When --no-mount is specified, exit after indexes for the specified files
                         have been created. Do not create a mount point. (default: True)
+  --recreate-index-on-errors
+                        Restores the default behavior of (re)creating indexes on errors and when
+                        no index exists. (default: None)
   --verify-mtime, --no-verify-mtime
                         By default, only the TAR file size is checked to match the one in the
                         found existing ratarmount index. If this option is specified, then also
@@ -114,7 +117,10 @@ Index Options:
                         check might cause false positives. (default: False)
   -c, --recreate-index, --no-recreate-index
                         If specified, pre-existing .index files will be deleted and newly
-                        created. (default: False)
+                        created. If --no-recreate-index is specified, never create or modify
+                        indexes. Only use existing ones as is. By default, indexes will be
+                        created and modified if they are found to be erroneous, see
+                        --recreate-index-on-error to restore that default. (default: None)
 
 Recursion Options:
   --recursion-depth RECURSION_DEPTH

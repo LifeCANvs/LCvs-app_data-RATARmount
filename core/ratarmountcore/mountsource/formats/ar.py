@@ -1,22 +1,18 @@
 import contextlib
 import io
-import json
 import logging
 import os
 import re
 import stat
 import struct
-import sys
 import tarfile
 import threading
-import time
 from pathlib import Path
-from typing import IO, Any, Optional, Union, cast
+from typing import IO, Optional, Union, cast
 
-from ratarmountcore.formats import FileFormatID, might_be_format
 from ratarmountcore.mountsource import FileInfo, MountSource
 from ratarmountcore.mountsource.SQLiteIndexMountSource import SQLiteIndexMountSource
-from ratarmountcore.SQLiteIndex import SQLiteIndex, SQLiteIndexedTarUserData
+from ratarmountcore.SQLiteIndex import SQLiteIndex
 from ratarmountcore.StenciledFile import RawStenciledFile, StenciledFile
 from ratarmountcore.utils import RatarmountError, overrides
 
@@ -240,16 +236,16 @@ class ARMountSource(SQLiteIndexMountSource):
 
         # fmt: off
         fileInfo : tuple = (
-            path            ,  #  0 : path
-            name            ,  #  1 : file name
-            info.offset     ,  #  2 : header offset
-            info.offset_data,  #  3 : data offset
-            info.size       ,  #  4 : file size
-            info.mtime      ,  #  5 : modification time
-            mode            ,  #  6 : file mode / permissions
-            0               ,  #  7 : TAR file type. Currently unused.
-            linkname        ,  #  8 : linkname
-            info.uid        ,  #  9 : user ID
+            path            ,  # 0  : path
+            name            ,  # 1  : file name
+            info.offset     ,  # 2  : header offset
+            info.offset_data,  # 3  : data offset
+            info.size       ,  # 4  : file size
+            info.mtime      ,  # 5  : modification time
+            mode            ,  # 6  : file mode / permissions
+            0               ,  # 7  : TAR file type. Currently unused.
+            linkname        ,  # 8  : linkname
+            info.uid        ,  # 9  : user ID
             info.gid        ,  # 10 : group ID
             False           ,  # 11 : is TAR (unused?)
             False           ,  # 12 : is sparse
