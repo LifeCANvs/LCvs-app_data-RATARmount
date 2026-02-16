@@ -192,7 +192,7 @@ class HTMLDataURLParser(HTMLParser):
 
         self.files.extend(
             EmbeddedFileCandidate(
-                original_url=match.group('original_url') or '',
+                original_url=match.groupdict().get('original_url', ''),
                 attribute='',
                 start=LineOffset(line, offset + match.span('data_url')[0]),
                 next=LineOffset(line, offset + match.span('data_url')[1]),
