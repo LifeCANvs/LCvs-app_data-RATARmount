@@ -193,15 +193,11 @@ if compareSchemaWithViews:
             );
         END;
         '''
-    schemaFilesViewWithTemporary = (
-        wordToIdPrimaryKey
-        + schemaFilesView
-        + '''
+    schemaFilesViewWithTemporary = wordToIdPrimaryKey + schemaFilesView + '''
         /* "A table created using CREATE TABLE AS has no PRIMARY KEY and no constraints of any kind"
          * Therefore, it will not be sorted and insertion will be faster! */
         CREATE TABLE "filestmp" AS SELECT * FROM "files" WHERE 0;
         '''
-    )
     schemas.update(
         {
             # Use a view and deduplication on insert trigger.

@@ -8,7 +8,7 @@ import sys
 try:
     import sqlcipher3  # noqa: F401
 except ImportError:
-    sqlcipher3 = None  # type:ignore
+    sqlcipher3 = None  # type: ignore
 
 import pytest
 from helpers import find_test_file

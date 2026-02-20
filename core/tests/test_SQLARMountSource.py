@@ -12,7 +12,7 @@ import pytest
 try:
     import sqlcipher3
 except ImportError:
-    sqlcipher3 = None  # type:ignore
+    sqlcipher3 = None  # type: ignore
 
 from helpers import copy_test_file
 

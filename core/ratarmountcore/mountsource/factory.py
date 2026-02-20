@@ -43,7 +43,7 @@ try:
             # Note that asycnssh SSHFile does/did not implement seekable correctly!
             # https://github.com/fsspec/sshfs/pull/50
             result = super().open(*args, **kwargs)
-            result.seekable = lambda: True  # type:ignore
+            result.seekable = lambda: True  # type: ignore
             return result
 
 except ImportError:

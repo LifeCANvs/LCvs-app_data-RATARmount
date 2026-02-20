@@ -557,12 +557,10 @@ class SQLiteIndex:
         self.store_metadata_key_value('backendName', self.backendName)
 
     def drop_metadata(self):
-        self.get_connection().executescript(
-            """
+        self.get_connection().executescript("""
             DROP TABLE IF EXISTS metadata;
             DROP TABLE IF EXISTS versions;
-            """
-        )
+            """)
 
     def try_to_open_first_file(self, openByPath):
         # Get first row that has the regular file bit set in mode (stat.S_IFREG == 32768 == 1<<15).

@@ -25,12 +25,12 @@ from ratarmount.cli import cli as ratarmountcli
 try:
     import ext4
 except ImportError:
-    ext4 = None  # type:ignore
+    ext4 = None  # type: ignore
 
 try:
     import sqlcipher3
 except ImportError:
-    sqlcipher3 = None  # type:ignore
+    sqlcipher3 = None  # type: ignore
 
 
 class RunRatarmount:

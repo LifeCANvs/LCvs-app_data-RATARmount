@@ -25,7 +25,7 @@ def compute_entropy_for_each(data: bytes, ns):
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.entropy.html
     result = []
     last = 0
-    c = collections.Counter()  # type:ignore
+    c = collections.Counter()  # type: ignore
     adata = np.frombuffer(data, dtype=np.uint8)
     counts = np.zeros(256)
     for n in ns:

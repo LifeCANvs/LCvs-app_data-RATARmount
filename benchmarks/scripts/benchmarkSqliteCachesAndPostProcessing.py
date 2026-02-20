@@ -20,15 +20,13 @@ def benchmark_cache_sizes(nFiles):
     for cacheSize in cacheSizes:
         databaseFile = tempfile.mkstemp()[1]
         db = sqlite3.connect(databaseFile)  # '1m-names-test.sqlite3' )
-        db.executescript(
-            f"""
+        db.executescript(f"""
             PRAGMA LOCKING_MODE = EXCLUSIVE;
             PRAGMA TEMP_STORE = MEMORY;
             PRAGMA JOURNAL_MODE = OFF;
             PRAGMA SYNCHRONOUS = OFF;
             PRAGMA CACHE_SIZE = -{cacheSize * 1000};
-            """
-        )
+            """)
         # use this schema as it represents the (path,name) primary key currently used in ratarmount
         db.execute('CREATE TABLE "files" ( "path" VARCHAR(65535), "hash" VARCHAR(65535), PRIMARY KEY (path,hash) );')
 
@@ -71,25 +69,21 @@ def benchmark_cache_sizes_sort_after(nFiles):
     for cacheSize in cacheSizes:
         databaseFile = tempfile.mkstemp()[1]
         db = sqlite3.connect(databaseFile)  # '1m-names-test.sqlite3' )
-        db.executescript(
-            f"""
+        db.executescript(f"""
             PRAGMA LOCKING_MODE = EXCLUSIVE;
             PRAGMA TEMP_STORE = MEMORY;
             PRAGMA JOURNAL_MODE = OFF;
             PRAGMA SYNCHRONOUS = OFF;
             PRAGMA CACHE_SIZE = -{cacheSize * 1000};
-            """
-        )
+            """)
         # use this schema as it represents the (path,name) primary key currently used in ratarmount
-        db.execute(
-            """
+        db.execute("""
             CREATE TABLE "files_tmp" (
                 "id"   INTEGER PRIMARY KEY,
                 "path" VARCHAR(65535),
                 "name" VARCHAR(65535)
             );
-            """
-        )
+            """)
 
         ########### INSERT benchmark ###########
         t0InsertAll = time.time()
@@ -100,15 +94,13 @@ def benchmark_cache_sizes_sort_after(nFiles):
             ]
             db.executemany('INSERT INTO files_tmp VALUES (?,?,?)', rows)
 
-        db.execute(
-            """
+        db.execute("""
             CREATE TABLE "files" (
                 "path" VARCHAR(65535),
                 "name" VARCHAR(65535),
                 PRIMARY KEY (path,name)
             );
-            """
-        )
+            """)
         db.execute('INSERT INTO "files" (path,name) SELECT path,name FROM "files_tmp" ORDER BY path,name;')
         db.execute('DROP TABLE "files_tmp"')
 

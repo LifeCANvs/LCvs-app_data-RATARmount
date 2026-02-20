@@ -14,7 +14,7 @@ import pytest
 try:
     import ext4
 except ImportError:
-    ext4 = None  # type:ignore
+    ext4 = None  # type: ignore
 
 from helpers import copy_test_file
 

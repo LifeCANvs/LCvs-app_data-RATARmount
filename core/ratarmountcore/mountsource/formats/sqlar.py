@@ -98,7 +98,7 @@ try:
     from cryptography.hazmat.backends import default_backend
     from cryptography.hazmat.primitives import hashes
     from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-    from sqlcipher3 import dbapi2 as sqlcipher3  # type:ignore
+    from sqlcipher3 import dbapi2 as sqlcipher3  # type: ignore
 except ImportError:
     # The cryptography imports can fail pretty badly and it does not seem to be catchable :(
     #
@@ -121,9 +121,9 @@ except ImportError:
     # In my case, pytest pointed to the Python 3.11 version even though my system-default is 3.12.
     # Using python3 -m pytest instead of pytest fixed the error. (Re)installing cffi and cryptography in 3.11
     # might also have worked.
-    sqlcipher3 = None  # type:ignore
-    PBKDF2HMAC = None  # type:ignore
-    default_backend = None  # type:ignore
+    sqlcipher3 = None  # type: ignore
+    PBKDF2HMAC = None  # type: ignore
+    default_backend = None  # type: ignore
 
 
 class FixedSqliteBlob(LambdaReaderFile):

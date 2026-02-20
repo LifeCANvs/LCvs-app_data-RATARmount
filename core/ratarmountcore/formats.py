@@ -38,7 +38,7 @@ with contextlib.suppress(ImportError):
 try:
     import sqlcipher3  # noqa: F401
 except ImportError:
-    sqlcipher3 = None  # type:ignore
+    sqlcipher3 = None  # type: ignore
 
 
 class FileFormatID(enum.Enum):
